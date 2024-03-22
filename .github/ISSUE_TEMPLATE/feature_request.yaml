@@ -1,0 +1,37 @@
+name: Feature Request
+description: Suggest a new feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to suggest a new feature.
+        Please fill the template below so that we can understand what you'd like to see and hopefully implement it.
+  - type: textarea
+    attributes:
+      label: Summary
+      description: Describe the feature in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Current Situation
+      description: Explain what functionality already exists, and why it's not sufficient.
+  - type: textarea
+    attributes:
+      label: Why do we need this? Who uses it, and when?
+      description: Help us understand **who** would use this feature and **when** they would use it.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed Implementation
+      description: |
+        Explain what you think the feature should look like, and if possible, how we should implement this.
+  - type: checkboxes
+    attributes:
+      label: Contributing
+      description: Indicate how you can contribute.
+      options:
+        - label: I can help by doing more research.
+        - label: I can help by implementing the feature after the proposal above is approved.
+        - label: I can help by testing the feature before it's released.

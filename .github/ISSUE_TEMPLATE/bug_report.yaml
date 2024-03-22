@@ -1,0 +1,62 @@
+name: Bug Report
+description: Report a problem
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to submit a bug report.
+        Please fill the template below so that we can investigate what's going wrong and hopefully fix it.
+  - type: textarea
+    attributes:
+      label: Summary
+      description: Describe the problem in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Provide detailed steps we can follow to reproduce the problem.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Current Result
+      description: Explain what currently happens after following those steps.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Result
+      description: Explain what you think should happen instead.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Relevant Logs
+      description: Copy and paste relevant logs and error messages (as text, not as a screenshot). This will be automatically formatted into a code block, so no need for backticks.
+      render: shell
+  - type: input
+    attributes:
+      label: CLI version
+      description: Provide the version of the CLI that you're using (run `prusalink version`.
+      placeholder: 0.1.0
+  - type: textarea
+    attributes:
+      label: Other Information
+      description: Anything else?
+  - type: textarea
+    attributes:
+      label: Proposed Fix
+      description: Explain how you think we should fix this.
+  - type: checkboxes
+    attributes:
+      label: Contributing
+      description: Indicate how you can contribute.
+      options:
+        - label: I can help by doing more research.
+        - label: I can help by implementing a fix after the proposal above is approved.
+        - label: I can help by testing the fix before it's released.
