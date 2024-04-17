@@ -36,11 +36,11 @@ func (f filesHandler) CreateFolder(storage, path string) error {
 	return nil
 }
 
-// Uploads a .gcode file to the given storage at the given path.
+// Uploads a .gcode or .bgcode file to the given storage at the given path.
 func (f filesHandler) Upload(
 	storage, folderPath, fileName string, content []byte, overwrite, printAfterUpload bool,
 ) error {
-	if !strings.HasSuffix(fileName, ".gcode") {
+	if !hasValidExtension(fileName) {
 		return ErrNonGcodeFile
 	}
 	if len(content) == 0 {
@@ -68,7 +68,7 @@ func (f filesHandler) Upload(
 
 // Starts the print of the file at the given path in the given storage.
 func (f filesHandler) StartPrint(storage string, path string) error {
-	if !strings.HasSuffix(path, ".gcode") {
+	if !hasValidExtension(path) {
 		return ErrNonGcodeFile
 	}
 	_, err := f.printer.post(fmt.Sprintf("/api/v1/files/%s/%s", storage, path), nil)
@@ -104,4 +104,13 @@ func (f filesHandler) parseError(err error) error {
 		return ErrAlreadyExists
 	}
 	return err
+}
+
+func hasValidExtension(fileName string) bool {
+	for _, extension := range []string{".gcode", ".bgcode"} {
+		if strings.HasSuffix(fileName, extension) {
+			return true
+		}
+	}
+	return false
 }

@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	ErrNonGcodeFile = fmt.Errorf("file must have .gcode extension")
+	ErrNonGcodeFile = fmt.Errorf("file must have .gcode or .bgcode extension")
 	ErrEmptyFile    = fmt.Errorf("empty files are not supported")
 
 	ErrStorageNotFound = fmt.Errorf("storage not found")
