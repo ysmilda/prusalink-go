@@ -29,7 +29,7 @@ func NewPrinter(host string, key string) *Printer {
 }
 
 func (p Printer) Version() (*Version, error) {
-	return parseAsJSON[Version](p.get("/api/v1/version"))
+	return parseAsJSON[Version](p.get("/api/version"))
 }
 
 func (p Printer) Info() (*Info, error) {
