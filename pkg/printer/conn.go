@@ -85,7 +85,7 @@ func (c Conn) request(method string, path string, data []byte, headers map[strin
 	if err != nil {
 		return nil, err
 	}
-	println(string(body))
+
 	return body, nil
 }
 
