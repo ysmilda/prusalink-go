@@ -13,14 +13,13 @@ type filesHandler struct {
 	conn *printer.Conn
 }
 
-// Returns a list of files and folders in the given storage at the given path
-// TODO: Implement oneOf (FileInfo, PrintFileInfo, FirmwareFileInfo, FolderInfo)
-// TODO: Add support for recursive listing?
+// Returns a list of files and folders in the given storage at the given path.
+// The returned FileInfo contains information about the files and folders in the given path.
+// The list is only one level deep.
 func (f filesHandler) List(storage, path string) (*FileInfo, error) {
-	return utils.ParseAsJSON[FileInfo](f.conn.Get(fmt.Sprintf("/api/v1/files/%s/%s", storage, path)))
+	return printer.ParseAsJSON[FileInfo](f.conn.Get(fmt.Sprintf("/api/v1/files/%s/%s", storage, path)))
 }
 
-// Creates a new folder in the given storage at the given path.
 func (f filesHandler) CreateFolder(storage, path string) error {
 	_, err := f.conn.Put(
 		fmt.Sprintf("/api/v1/files/%s/%s", storage, path),
@@ -36,7 +35,9 @@ func (f filesHandler) CreateFolder(storage, path string) error {
 	return nil
 }
 
-// Uploads a .gcode or .bgcode file to the given storage at the given path.
+// Upload uploads a .gcode or .bgcode file to the given storage at the given path.
+// Overwrite indicates whether the file should be overwritten if it already exists, and printAfterUpload
+// indicates whether the file should be printed after upload.
 func (f filesHandler) Upload(
 	storage, folderPath, fileName string, content []byte, overwrite, printAfterUpload bool,
 ) error {
@@ -46,6 +47,24 @@ func (f filesHandler) Upload(
 	if len(content) == 0 {
 		return printer.ErrEmptyFile
 	}
+
+	headers := map[string]string{
+		"Content-Length": fmt.Sprintf("%d", len(content)),
+	}
+	if strings.HasSuffix(fileName, ".bgcode") {
+		headers["Content-Type"] = "application/gcode+binary"
+	} else {
+		headers["Content-Type"] = "text/x.gcode"
+	}
+	if printAfterUpload {
+		headers["Print-After-Upload"] = "?1"
+	}
+	if overwrite {
+		headers["Overwrite"] = "?1"
+	} else {
+		headers["Overwrite"] = "?0"
+	}
+
 	_, err := f.conn.Put(
 		fmt.Sprintf(
 			"/api/v1/files/%s/%s",
@@ -53,12 +72,7 @@ func (f filesHandler) Upload(
 			folderPath+"/"+fileName,
 		),
 		content,
-		map[string]string{
-			"Content-Type":       "application/octet-stream",
-			"Content-Length":     fmt.Sprintf("%d", len(content)),
-			"Print-After-Upload": fmt.Sprintf("?%d", utils.BoolToInt(printAfterUpload)),
-			"Overwrite":          fmt.Sprintf("?%d", utils.BoolToInt(overwrite)),
-		},
+		headers,
 	)
 	if err != nil {
 		return fmt.Errorf("could not upload file: %w", f.parseError(err))
@@ -66,7 +80,6 @@ func (f filesHandler) Upload(
 	return nil
 }
 
-// Starts the print of the file at the given path in the given storage.
 func (f filesHandler) StartPrint(storage string, path string) error {
 	if !hasValidExtension(path) {
 		return printer.ErrNonGcodeFile
@@ -78,9 +91,8 @@ func (f filesHandler) StartPrint(storage string, path string) error {
 	return nil
 }
 
-func (f filesHandler) State(storage, path string) error {
-	// TODO: Implement
-	return nil
+func (f filesHandler) Info(storage, path string) (*FileInfo, error) {
+	return printer.ParseAsJSON[FileInfo](f.conn.Head(fmt.Sprintf("/api/v1/files/%s/%s", storage, path)))
 }
 
 func (f filesHandler) Delete(storage, path string, deleteNonEmptyFolder bool) error {
@@ -91,7 +103,7 @@ func (f filesHandler) Delete(storage, path string, deleteNonEmptyFolder bool) er
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("could not delete file: %w", f.parseError(err))
+		return fmt.Errorf("could not delete \"%s\": %w", path, f.parseError(err))
 	}
 	return nil
 }
@@ -101,7 +113,7 @@ func (f filesHandler) parseError(err error) error {
 		return printer.ErrStorageNotFound
 	}
 	if errors.Is(err, printer.ErrConflict) {
-		return printer.ErrAlreadyExists
+		return printer.ErrConflict
 	}
 	return err
 }

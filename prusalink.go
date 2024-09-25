@@ -2,7 +2,6 @@ package prusalink
 
 import (
 	"github.com/ysmilda/prusalink-go/pkg/printer"
-	"github.com/ysmilda/prusalink-go/pkg/utils"
 	v1 "github.com/ysmilda/prusalink-go/pkg/v1"
 )
 
@@ -15,7 +14,7 @@ func NewPrinter(host string, key string) *Printer {
 }
 
 func (p Printer) Version() (*Version, error) {
-	return utils.ParseAsJSON[Version](p.Get("/api/version"))
+	return printer.ParseAsJSON[Version](p.Get("/api/version"))
 }
 
 func (p *Printer) V1() *v1.V1 {

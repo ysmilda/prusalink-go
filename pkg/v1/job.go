@@ -5,16 +5,22 @@ import (
 	"fmt"
 
 	"github.com/ysmilda/prusalink-go/pkg/printer"
-	"github.com/ysmilda/prusalink-go/pkg/utils"
 )
 
 type jobHandler struct {
 	conn *printer.Conn
 }
 
-// Get retrieves information on the current job.
+// Get retrieves information on the current job. If no job is running, it returns nil.
 func (j jobHandler) Get() (*Job, error) {
-	return utils.ParseAsJSON[Job](j.conn.Get("/api/v1/job"))
+	job, err := printer.ParseAsJSON[Job](j.conn.Get("/api/v1/job"))
+	if err != nil && !errors.Is(err, printer.ErrEmptyBody) {
+		return nil, fmt.Errorf("could not get job: %w", err)
+	}
+	if job == nil {
+		return nil, ErrNoJob
+	}
+	return job, nil
 }
 
 // Stop stops the job with the given ID.

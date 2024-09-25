@@ -14,7 +14,7 @@ linters:
     - asciicheck # Finds non-ASCII identifiers.
     - bodyclose # Finds HTTP response bodies that are not closed.
     - errorlint # Finds problems with error wrapping.
-    - exportloopref # Finds pointers to range variables.
+    - copyloopvar
     - goconst # Finds repeated strings that could be replaced by a const.
     - gocyclo # Finds funcs with high cyclomatic complexity.
     - godot # Finds comments that do not end with a period.
@@ -24,7 +24,6 @@ linters:
     - makezero # Finds combinations of `make([]T, n)` and `append()`.
     - nakedret # Finds naked returns.
     - nilnil # Finds `return nil, nil`.
-    - paralleltest # Finds tests that could be executed in parallel.
     - prealloc # Finds slice declarations that could be pre-allocated.
     - revive # Runs `revive` with our existing config.
     - rowserrcheck # Finds incorrect error checking when working with sql.Rows.

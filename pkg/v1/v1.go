@@ -2,7 +2,6 @@ package v1
 
 import (
 	"github.com/ysmilda/prusalink-go/pkg/printer"
-	"github.com/ysmilda/prusalink-go/pkg/utils"
 )
 
 type V1 struct {
@@ -13,20 +12,25 @@ func New(conn *printer.Conn) *V1 {
 	return &V1{conn}
 }
 
+// Info returns general information about the printer.
 func (v V1) Info() (*Info, error) {
-	return utils.ParseAsJSON[Info](v.conn.Get("/api/v1/info"))
+	return printer.ParseAsJSON[Info](v.conn.Get("/api/v1/info"))
 }
 
+// Status returns condensed information about various printer states.
 func (v V1) Status() (*Status, error) {
-	return utils.ParseAsJSON[Status](v.conn.Get("/api/v1/status"))
+	return printer.ParseAsJSON[Status](v.conn.Get("/api/v1/status"))
 }
 
+// Storage returns information about the available storage.
 func (v V1) Storage() (*Storage, error) {
-	return utils.ParseAsJSON[Storage](v.conn.Get("/api/v1/storage"))
+	return printer.ParseAsJSON[Storage](v.conn.Get("/api/v1/storage"))
 }
 
+// Transfer returns the current transfer status.
+// However it seems that the transfer information in the Status request is updated more frequently.
 func (v V1) Transfer() (*Transfer, error) {
-	return utils.ParseAsJSON[Transfer](v.conn.Get("/api/v1/transfer"))
+	return printer.ParseAsJSON[Transfer](v.conn.Get("/api/v1/transfer"))
 }
 
 func (v V1) Job() *jobHandler {

@@ -1,7 +1,5 @@
 package v1
 
-import "github.com/ysmilda/prusalink-go/pkg/printer"
-
 type Info struct {
 	NozzleDiameter   float64 `json:"nozzle_diameter"`
 	MMU              bool    `json:"mmu"`
@@ -18,11 +16,11 @@ type Status struct {
 }
 
 type StatusJob struct {
-	ID               int               `json:"id"`
-	Progress         float64           `json:"progress"` // Percents
-	TimeRemaining    *printer.Duration `json:"time_remaining,omitempty"`
-	FilamentChangeIn *printer.Duration `json:"filament_change_in,omitempty"`
-	TimePrinting     printer.Duration  `json:"time_printing"`
+	ID               int     `json:"id"`
+	Progress         float64 `json:"progress"`                     // Percents
+	TimeRemaining    *int    `json:"time_remaining,omitempty"`     // Seconds
+	FilamentChangeIn *int    `json:"filament_change_in,omitempty"` // Seconds
+	TimePrinting     int     `json:"time_printing"`                // Seconds
 }
 
 // Telemetry info about current storage status.
@@ -36,7 +34,7 @@ type StatusStorage struct {
 type StatusTransfer struct {
 	ID               int     `json:"id"`
 	TimeTransferring int     `json:"time_transferring"`
-	Progress         float64 `json:"progress"` // Percents
+	Progress         float64 `json:"progress"` // Percents [0, 1]
 	Transferred      *int    `json:"transferred"`
 }
 
@@ -69,46 +67,46 @@ type StorageInfo struct {
 }
 
 type Job struct {
-	ID            int               `json:"id"`
-	State         string            `json:"state"`
-	Progress      float64           `json:"progress"` // Percents
-	TimeRemaining *printer.Duration `json:"time_remaining,omitempty"`
-	TimePrinting  printer.Duration  `json:"time_printing"`
-	File          JobFile           `json:"file"`
+	ID            int      `json:"id"`
+	State         string   `json:"state"`
+	Progress      float64  `json:"progress"`                 // Percents
+	TimeRemaining *int     `json:"time_remaining,omitempty"` // Seconds
+	TimePrinting  int      `json:"time_printing"`            // Seconds
+	File          *JobFile `json:"file,omitempty"`
 }
 
 type JobFile struct {
-	Refs        FileRefs      `json:"refs"`
-	Name        string        `json:"name"`         // Short Filename
-	DisplayName string        `json:"display_name"` // Long Filename
-	Path        string        `json:"path"`
-	Size        *int          `json:"size,omitempty"` // Bytes
-	Timestamp   *printer.Time `json:"m_timestamp,omitempty"`
+	Refs        FileRefs `json:"refs"`
+	Name        string   `json:"name"`         // Short Filename
+	DisplayName string   `json:"display_name"` // Long Filename
+	Path        string   `json:"path"`
+	Size        *int     `json:"size,omitempty"` // Bytes
+	Timestamp   *int     `json:"m_timestamp,omitempty"`
 }
 
 type Transfer struct {
-	Type             string           `json:"type"`
-	DisplayName      string           `json:"display_name"` // Long Filename
-	Path             string           `json:"path"`
-	Size             string           `json:"size"`        // Bytes
-	Progress         float64          `json:"progress"`    // Percents
-	Transferred      int              `json:"transferred"` // Transfered data in bytes
-	TimeRemaining    printer.Duration `json:"time_remaining,omitempty"`
-	TimeTransferring printer.Duration `json:"time_transferring"`
-	ToPrint          bool             `json:"to_print"` // Whether or not print after finishing transfer (upload)
+	Type             string  `json:"type"`
+	DisplayName      string  `json:"display_name"` // Long Filename
+	Path             string  `json:"path"`
+	Size             int     `json:"size,string"`       // Bytes
+	Progress         float64 `json:"progress"`          // Percents
+	Transferred      int     `json:"transferred"`       // Transfered data in bytes
+	TimeRemaining    int     `json:"time_remaining"`    // Seconds
+	TimeTransferring int     `json:"time_transferring"` // Seconds
+	ToPrint          bool    `json:"to_print"`          // Whether or not print after finishing transfer (upload)
 }
 
 // FileInfo represents a file or folder on the printer. If the file is a folder the Children field will be populated.
 // The children struct only goes one level deep, the printer has no recursive listing.
 type FileInfo struct {
-	Name        string        `json:"name"`
-	DisplayName string        `json:"display_name"`
-	ReadOnly    bool          `json:"ro"`
-	Type        string        `json:"type"`
-	Timestamp   *printer.Time `json:"m_timestamp,omitempty"`
-	Size        *int          `json:"size,omitempty"`
-	Refs        *FileRefs     `json:"refs,omitempty"`
-	Children    []FileInfo    `json:"children,omitempty"`
+	Name        string     `json:"name"`
+	DisplayName *string    `json:"display_name,omitempty"`
+	ReadOnly    bool       `json:"ro"`
+	Type        string     `json:"type"`
+	Timestamp   *float64   `json:"m_timestamp,omitempty"` // TODO: Figure out how this is encoded
+	Size        *int       `json:"size,omitempty"`
+	Refs        *FileRefs  `json:"refs,omitempty"`
+	Children    []FileInfo `json:"children,omitempty"`
 }
 
 // IsDir returns true if the file is a folder.

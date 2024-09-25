@@ -10,11 +10,13 @@
     "coveredGutterStyle": "blockgreen",
     "uncoveredGutterStyle": "blockred"
   },
-  "go.coverOnSave": true,
   "go.coverOnSingleTest": true,
   "go.lintTool": "golangci-lint",
   "go.lintFlags": ["--fast"],
   "go.toolsManagement.autoUpdate": true,
+  "go.testEnvFile": "${workspaceFolder}/.envrc",
+  "go.testTimeout": "300s",
+  "go.testFlags": ["-count=1"],
 
   "[go][go.mod]": {
     "editor.formatOnSave": true,
