@@ -1,4 +1,4 @@
-package types
+package printer
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ func (d Duration) String() string {
 }
 
 func (d Duration) MarshallJSON() ([]byte, error) {
-	return json.Marshal(d)
+	return json.Marshal(time.Duration(d))
 }
 
 func (d *Duration) UnmarshallJSON(data []byte) error {
@@ -32,7 +32,7 @@ func (t Time) String() string {
 }
 
 func (t Time) MarshallJSON() ([]byte, error) {
-	return json.Marshal(t)
+	return json.Marshal(time.Time(t))
 }
 
 func (t *Time) UnmarshallJSON(data []byte) error {

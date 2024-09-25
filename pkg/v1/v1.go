@@ -1,62 +1,38 @@
 package v1
 
 import (
-	"fmt"
+	"github.com/ysmilda/prusalink-go/pkg/printer"
+	"github.com/ysmilda/prusalink-go/pkg/utils"
 )
 
-var (
-	ErrNonGcodeFile = fmt.Errorf("file must have .gcode or .bgcode extension")
-	ErrEmptyFile    = fmt.Errorf("empty files are not supported")
-
-	ErrStorageNotFound = fmt.Errorf("storage not found")
-	ErrAlreadyExists   = fmt.Errorf("already exists")
-)
-
-type Printer struct {
-	host    string
-	key     string
-	headers map[string]string
+type V1 struct {
+	conn *printer.Conn
 }
 
-func NewPrinter(host string, key string) *Printer {
-	return &Printer{
-		host: host,
-		key:  key,
-		headers: map[string]string{
-			"X-Api-Key": key,
-		},
-	}
+func New(conn *printer.Conn) *V1 {
+	return &V1{conn}
 }
 
-func (p Printer) Version() (*Version, error) {
-	return parseAsJSON[Version](p.get("/api/version"))
+func (v V1) Info() (*Info, error) {
+	return utils.ParseAsJSON[Info](v.conn.Get("/api/v1/info"))
 }
 
-func (p Printer) Info() (*Info, error) {
-	return parseAsJSON[Info](p.get("/api/v1/info"))
+func (v V1) Status() (*Status, error) {
+	return utils.ParseAsJSON[Status](v.conn.Get("/api/v1/status"))
 }
 
-func (p Printer) Status() (*Status, error) {
-	return parseAsJSON[Status](p.get("/api/v1/status"))
+func (v V1) Storage() (*Storage, error) {
+	return utils.ParseAsJSON[Storage](v.conn.Get("/api/v1/storage"))
 }
 
-func (p Printer) Storage() (*StorageInfo, error) {
-	return parseAsJSON[StorageInfo](p.get("/api/v1/storage"))
+func (v V1) Transfer() (*Transfer, error) {
+	return utils.ParseAsJSON[Transfer](v.conn.Get("/api/v1/transfer"))
 }
 
-func (p Printer) Job() *jobHandler {
-	return &jobHandler{&p}
+func (v V1) Job() *jobHandler {
+	return &jobHandler{v.conn}
 }
 
-func (p Printer) Transfer() *transferHandler {
-	return &transferHandler{&p}
-}
-
-func (p Printer) Files() *filesHandler {
-	return &filesHandler{&p}
-}
-
-// Warning: This function has not been tested against a printer due to lack of hardware.
-func (p Printer) Camera() *cameraHandler {
-	return &cameraHandler{&p}
+func (v V1) Files() *filesHandler {
+	return &filesHandler{v.conn}
 }

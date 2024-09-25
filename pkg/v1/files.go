@@ -5,24 +5,24 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ysmilda/prusalink-go/pkg/rest"
+	"github.com/ysmilda/prusalink-go/pkg/printer"
 	"github.com/ysmilda/prusalink-go/pkg/utils"
 )
 
 type filesHandler struct {
-	printer *Printer
+	conn *printer.Conn
 }
 
 // Returns a list of files and folders in the given storage at the given path
 // TODO: Implement oneOf (FileInfo, PrintFileInfo, FirmwareFileInfo, FolderInfo)
 // TODO: Add support for recursive listing?
-func (f filesHandler) List(storage, path string) (interface{}, error) {
-	return parseAsJSON[interface{}](f.printer.get(fmt.Sprintf("/api/v1/files/%s/%s", storage, path)))
+func (f filesHandler) List(storage, path string) (*FileInfo, error) {
+	return utils.ParseAsJSON[FileInfo](f.conn.Get(fmt.Sprintf("/api/v1/files/%s/%s", storage, path)))
 }
 
 // Creates a new folder in the given storage at the given path.
 func (f filesHandler) CreateFolder(storage, path string) error {
-	_, err := f.printer.put(
+	_, err := f.conn.Put(
 		fmt.Sprintf("/api/v1/files/%s/%s", storage, path),
 		nil,
 		map[string]string{
@@ -41,12 +41,12 @@ func (f filesHandler) Upload(
 	storage, folderPath, fileName string, content []byte, overwrite, printAfterUpload bool,
 ) error {
 	if !hasValidExtension(fileName) {
-		return ErrNonGcodeFile
+		return printer.ErrNonGcodeFile
 	}
 	if len(content) == 0 {
-		return ErrEmptyFile
+		return printer.ErrEmptyFile
 	}
-	_, err := f.printer.put(
+	_, err := f.conn.Put(
 		fmt.Sprintf(
 			"/api/v1/files/%s/%s",
 			storage,
@@ -69,9 +69,9 @@ func (f filesHandler) Upload(
 // Starts the print of the file at the given path in the given storage.
 func (f filesHandler) StartPrint(storage string, path string) error {
 	if !hasValidExtension(path) {
-		return ErrNonGcodeFile
+		return printer.ErrNonGcodeFile
 	}
-	_, err := f.printer.post(fmt.Sprintf("/api/v1/files/%s/%s", storage, path), nil)
+	_, err := f.conn.Post(fmt.Sprintf("/api/v1/files/%s/%s", storage, path), nil)
 	if err != nil {
 		return fmt.Errorf("could not start print: %w", f.parseError(err))
 	}
@@ -84,7 +84,7 @@ func (f filesHandler) State(storage, path string) error {
 }
 
 func (f filesHandler) Delete(storage, path string, deleteNonEmptyFolder bool) error {
-	_, err := f.printer.delete(
+	_, err := f.conn.Delete(
 		fmt.Sprintf("/api/v1/files/%s/%s", storage, path),
 		map[string]string{
 			"Force": fmt.Sprintf("?%d", utils.BoolToInt(deleteNonEmptyFolder)),
@@ -97,11 +97,11 @@ func (f filesHandler) Delete(storage, path string, deleteNonEmptyFolder bool) er
 }
 
 func (f filesHandler) parseError(err error) error {
-	if errors.Is(err, rest.ErrNotFound) {
-		return ErrStorageNotFound
+	if errors.Is(err, printer.ErrNotFound) {
+		return printer.ErrStorageNotFound
 	}
-	if errors.Is(err, rest.ErrConflict) {
-		return ErrAlreadyExists
+	if errors.Is(err, printer.ErrConflict) {
+		return printer.ErrAlreadyExists
 	}
 	return err
 }

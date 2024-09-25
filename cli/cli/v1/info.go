@@ -9,7 +9,7 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Retrieves information about the printer.",
 	RunE: func(_ *cobra.Command, _ []string) error {
-		info, err := printer.Info()
+		info, err := conn.Info()
 		if err != nil {
 			return err
 		}

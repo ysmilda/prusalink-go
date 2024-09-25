@@ -9,7 +9,7 @@ var storageCmd = &cobra.Command{
 	Use:   "storage",
 	Short: "Retrieves storage information about the printer.",
 	RunE: func(_ *cobra.Command, _ []string) error {
-		storage, err := printer.Storage()
+		storage, err := conn.Storage()
 		if err != nil {
 			return err
 		}

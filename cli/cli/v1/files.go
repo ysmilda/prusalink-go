@@ -7,13 +7,16 @@ import (
 	"github.com/ysmilda/prusalink-go/cli/cli"
 )
 
+var (
+	storage string
+	path    string
+)
+
 var filesCmd = &cobra.Command{
 	Use:   "files",
 	Short: "Retrieves information about the files on the printer.",
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		storage, _ := cmd.Flags().GetString("storage")
-		path, _ := cmd.Flags().GetString("path")
-		files, err := printer.Files().List(storage, path)
+		files, err := conn.Files().List(storage, path)
 		if err != nil {
 			return err
 		}
@@ -27,9 +30,10 @@ func init() {
 	filesCmd.AddCommand(filesCreateFolderCmd)
 	filesCmd.AddCommand(filesUploadCmd)
 	filesCmd.AddCommand(filesStartPrintCmd)
+	filesCmd.AddCommand(filesDeleteCmd)
 
-	filesCmd.PersistentFlags().String("storage", "", "Storage medium to access")
-	filesCmd.PersistentFlags().String("path", "", "Path to access. Depending on the command it can link to a folder or a file") //nolint: lll
+	filesCmd.PersistentFlags().StringVar(&storage, "storage", "", "Storage medium to access")
+	filesCmd.PersistentFlags().StringVar(&path, "path", "", "Path to access. Depending on the command it can link to a folder or a file") //nolint: lll
 	_ = filesCmd.MarkPersistentFlagRequired("storage")
 	_ = filesCmd.MarkPersistentFlagRequired("path")
 
@@ -37,6 +41,8 @@ func init() {
 	filesUploadCmd.Flags().Bool("overwrite", false, "Overwrite the file if it already exists")
 	filesUploadCmd.Flags().Bool("print", false, "Print the file after uploading")
 	_ = filesUploadCmd.MarkFlagRequired("file")
+
+	filesStartPrintCmd.Flags().Bool("deleteNonEmptyFolder", false, "Delete the folder even if it is not empty.")
 }
 
 var filesCreateFolderCmd = &cobra.Command{
@@ -44,9 +50,7 @@ var filesCreateFolderCmd = &cobra.Command{
 	Short: "Creates a new folder on the printer.",
 	Long:  "Creates a new folder on the printer. The path must point to the folder that needs to be created.",
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		storage, _ := cmd.Flags().GetString("storage")
-		path, _ := cmd.Flags().GetString("path")
-		return printer.Files().CreateFolder(storage, path)
+		return conn.Files().CreateFolder(storage, path)
 	},
 }
 
@@ -58,8 +62,6 @@ The file must have a .gcode extension and the path must point to a folder.
 If the file already exists on the printer, it will not be overwritten unless the --overwrite flag is set.
 If the --print flag is set, the file will be printed after uploading.`,
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		storage, _ := cmd.Flags().GetString("storage")
-		path, _ := cmd.Flags().GetString("path")
 		file, _ := cmd.Flags().GetString("file")
 		overwrite, _ := cmd.Flags().GetBool("overwrite")
 		printAfterUpload, _ := cmd.Flags().GetBool("print")
@@ -67,7 +69,7 @@ If the --print flag is set, the file will be printed after uploading.`,
 		if err != nil {
 			return err
 		}
-		return printer.Files().Upload(storage, path, file, content, overwrite, printAfterUpload)
+		return conn.Files().Upload(storage, path, file, content, overwrite, printAfterUpload)
 	},
 }
 
@@ -76,8 +78,16 @@ var filesStartPrintCmd = &cobra.Command{
 	Short: "Starts a print on the printer.",
 	Long:  "Starts a print on the printer. The path must point to a .gcode file.",
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		storage, _ := cmd.Flags().GetString("storage")
-		path, _ := cmd.Flags().GetString("path")
-		return printer.Files().StartPrint(storage, path)
+		return conn.Files().StartPrint(storage, path)
+	},
+}
+
+var filesDeleteCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Deletes a file or folder on the printer.",
+	Long:  "Deletes a file or folder on the printer. The path must point to the file or folder that needs to be deleted.",
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		deleteNonEmptyFolder, _ := cmd.Flags().GetBool("deleteNonEmptyFolder")
+		return conn.Files().Delete(storage, path, deleteNonEmptyFolder)
 	},
 }

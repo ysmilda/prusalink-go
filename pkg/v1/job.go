@@ -4,56 +4,48 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ysmilda/prusalink-go/pkg/rest"
+	"github.com/ysmilda/prusalink-go/pkg/printer"
+	"github.com/ysmilda/prusalink-go/pkg/utils"
 )
 
 type jobHandler struct {
-	printer *Printer
+	conn *printer.Conn
 }
 
-// Returns info about the current job.
-func (j jobHandler) GetCurrent() (*Job, error) {
-	return parseAsJSON[Job](j.printer.get("/api/v1/job"))
+// Get retrieves information on the current job.
+func (j jobHandler) Get() (*Job, error) {
+	return utils.ParseAsJSON[Job](j.conn.Get("/api/v1/job"))
 }
 
-// Stops the job with the given ID.
+// Stop stops the job with the given ID.
 func (j jobHandler) Stop(id int) error {
-	_, err := j.printer.delete(fmt.Sprintf("/api/v1/job/%d", id), nil)
+	_, err := j.conn.Delete(fmt.Sprintf("/api/v1/job/%d", id), nil)
 	if err != nil {
 		return fmt.Errorf("could not stop job: %w", j.parseError(err, id))
 	}
 	return nil
 }
 
-// Pauses the job with the given ID.
+// Pause pauses the job with the given ID.
 func (j jobHandler) Pause(id int) error {
-	_, err := j.printer.put(fmt.Sprintf("/api/v1/job/%d/pause", id), nil, nil)
+	_, err := j.conn.Put(fmt.Sprintf("/api/v1/job/%d/pause", id), nil, nil)
 	if err != nil {
 		return fmt.Errorf("could not pause job: %w", j.parseError(err, id))
 	}
 	return nil
 }
 
-// Resumes the job with the given ID.
+// Resume resumes the job with the given ID.
 func (j jobHandler) Resume(id int) error {
-	_, err := j.printer.put(fmt.Sprintf("/api/v1/job/%d/resume", id), nil, nil)
+	_, err := j.conn.Put(fmt.Sprintf("/api/v1/job/%d/resume", id), nil, nil)
 	if err != nil {
 		return fmt.Errorf("could not resume job: %w", j.parseError(err, id))
 	}
 	return nil
 }
 
-// Continues the job with the given ID.
-func (j jobHandler) Continue(id int) error {
-	_, err := j.printer.put(fmt.Sprintf("/api/v1/job/%d/continue", id), nil, nil)
-	if err != nil {
-		return fmt.Errorf("could not continue job: %w", j.parseError(err, id))
-	}
-	return nil
-}
-
 func (j jobHandler) parseError(err error, id int) error {
-	if errors.Is(err, rest.ErrNotFound) {
+	if errors.Is(err, printer.ErrNotFound) {
 		err = fmt.Errorf("job with ID %d not found", id)
 	}
 	return err

@@ -10,7 +10,7 @@ var jobCmd = &cobra.Command{
 	Short: "Retrieves job information about the printer.",
 
 	RunE: func(_ *cobra.Command, _ []string) error {
-		job, err := printer.Job().GetCurrent()
+		job, err := conn.Job().Get()
 		if err != nil {
 			return err
 		}
@@ -28,16 +28,13 @@ func init() {
 	jobCmd.AddCommand(jobStopCmd)
 	jobCmd.AddCommand(jobPauseCmd)
 	jobCmd.AddCommand(jobResumeCmd)
-	jobCmd.AddCommand(jobContinueCmd)
 
 	jobStopCmd.Flags().IntP("id", "i", 0, "ID of the job to stop")
 	jobPauseCmd.Flags().IntP("id", "i", 0, "ID of the job to pause")
 	jobResumeCmd.Flags().IntP("id", "i", 0, "ID of the job to resume")
-	jobContinueCmd.Flags().IntP("id", "i", 0, "ID of the job to continue")
 	_ = jobStopCmd.MarkFlagRequired("id")
 	_ = jobPauseCmd.MarkFlagRequired("id")
 	_ = jobResumeCmd.MarkFlagRequired("id")
-	_ = jobContinueCmd.MarkFlagRequired("id")
 }
 
 var jobStopCmd = &cobra.Command{
@@ -45,7 +42,7 @@ var jobStopCmd = &cobra.Command{
 	Short: "Stops the job with the given ID",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		id, _ := cmd.Flags().GetInt("id")
-		return printer.Job().Stop(id)
+		return conn.Job().Stop(id)
 	},
 }
 
@@ -54,7 +51,7 @@ var jobPauseCmd = &cobra.Command{
 	Short: "Pauses the job with the given ID",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		id, _ := cmd.Flags().GetInt("id")
-		return printer.Job().Pause(id)
+		return conn.Job().Pause(id)
 	},
 }
 
@@ -63,15 +60,6 @@ var jobResumeCmd = &cobra.Command{
 	Short: "Resumes the job with the given ID",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		id, _ := cmd.Flags().GetInt("id")
-		return printer.Job().Resume(id)
-	},
-}
-
-var jobContinueCmd = &cobra.Command{
-	Use:   "continue",
-	Short: "Continues the job with the given ID",
-	RunE: func(cmd *cobra.Command, _ []string) error {
-		id, _ := cmd.Flags().GetInt("id")
-		return printer.Job().Continue(id)
+		return conn.Job().Resume(id)
 	},
 }

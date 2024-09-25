@@ -9,7 +9,7 @@ var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Retrieves status information about the printer.",
 	RunE: func(_ *cobra.Command, _ []string) error {
-		status, err := printer.Status()
+		status, err := conn.Status()
 		if err != nil {
 			return err
 		}

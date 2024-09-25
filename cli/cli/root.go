@@ -5,9 +5,16 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/ysmilda/prusalink-go"
 )
 
-var PrettyPrint bool
+var (
+	PrettyPrint bool
+	Printer     *prusalink.Printer
+
+	host string
+	key  string
+)
 
 var RootCmd = &cobra.Command{
 	Use:   "prusalink",
@@ -17,6 +24,9 @@ var RootCmd = &cobra.Command{
 	PrusaLink is a REST API for Prusa 3D printers. This CLI provides a simple
 	interface to interact with the API. It is intended to be used for scripting
 	and automation.`,
+	PersistentPreRun: func(_ *cobra.Command, _ []string) {
+		Printer = prusalink.NewPrinter(host, key)
+	},
 }
 
 func Execute() {
@@ -28,6 +38,10 @@ func Execute() {
 
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&PrettyPrint, "pretty", "p", false, "Pretty print the output.")
+	RootCmd.PersistentFlags().StringVar(&host, "host", "http://localhost:80", "The host of the PrusaLink server.")
+	RootCmd.PersistentFlags().StringVar(&key, "key", "", "The API key to authenticate with the PrusaLink server.")
+	_ = RootCmd.MarkPersistentFlagRequired("host")
+	_ = RootCmd.MarkPersistentFlagRequired("key")
 }
 
 func Print(in interface{}) error {

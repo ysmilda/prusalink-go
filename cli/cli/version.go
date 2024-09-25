@@ -1,6 +1,8 @@
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 var (
 	version string
@@ -25,6 +27,19 @@ var versionCmd = &cobra.Command{
 	},
 }
 
+var versionPrinterCmd = &cobra.Command{
+	Use:   "versionprinter",
+	Short: "Retrieves the version information from the printer.",
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		version, err := Printer.Version()
+		if err != nil {
+			return err
+		}
+		return Print(version)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(versionCmd)
+	RootCmd.AddCommand(versionPrinterCmd)
 }
